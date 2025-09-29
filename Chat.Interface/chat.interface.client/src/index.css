@@ -1,3 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+    body {
+        @apply bg-gray-50 text-gray-900;
+    }
+}
+
+@layer components {
+    .chat-message {
+        @apply p-4 rounded-lg max-w-md;
+    }
+
+        .chat-message.user {
+            @apply bg-primary-500 text-white ml-auto;
+        }
+
+        .chat-message.assistant {
+            @apply bg-white border border-gray-200 mr-auto;
+        }
+
+    .data-source-card {
+        @apply bg-white p-6 rounded-lg border border-gray-200 hover:border-primary-300 transition-colors cursor-pointer;
+    }
+
+        .data-source-card.connected {
+            @apply border-green-300 bg-green-50;
+        }
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
