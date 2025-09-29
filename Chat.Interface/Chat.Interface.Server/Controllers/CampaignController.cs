@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Chat.Interface.Server.Application.Commands;
 using Chat.Interface.Server.Domain.Entities;
+using Chat.Interface.Server.Infrastructure.Services;
 
 namespace Chat.Interface.Server.Controllers;
 
@@ -10,10 +11,12 @@ namespace Chat.Interface.Server.Controllers;
 public class CampaignController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICampaignExecutionService _executionService;
 
-    public CampaignController(IMediator mediator)
+    public CampaignController(IMediator mediator, ICampaignExecutionService executionService)
     {
         _mediator = mediator;
+        _executionService = executionService;
     }
 
     [HttpPost("generate")]
@@ -22,6 +25,39 @@ public class CampaignController : ControllerBase
         var command = new GenerateCampaignCommand(request.Prompt, request.DataSourceIds, request.PreferredChannels);
         var campaign = await _mediator.Send(command);
         return Ok(campaign);
+    }
+
+    [HttpPost("{id}/execute")]
+    public async Task<ActionResult<object>> GetExecutionPayload(Guid id)
+    {
+        // In a real implementation, you'd fetch the campaign from the repository
+        var campaign = new Campaign
+        {
+            Id = id,
+            Name = "Sample Campaign",
+            Message = "Limited time offer - Get 20% off your next purchase!",
+            Channels = new List<ChannelType> { ChannelType.Email, ChannelType.SMS },
+            Audience = new AudienceSegment
+            {
+                Name = "High-Value Customers",
+                EstimatedSize = 10000,
+                Criteria = new Dictionary<string, object>
+                {
+                    ["ageRange"] = "25-45",
+                    ["location"] = "US",
+                    ["behavior"] = "purchased_last_90_days"
+                }
+            },
+            Timing = new CampaignTiming
+            {
+                OptimalTime = DateTime.UtcNow.AddDays(1),
+                TimeZone = "UTC",
+                PreferredDays = new List<string> { "Monday", "Tuesday", "Wednesday" }
+            }
+        };
+
+        var executionPayload = await _executionService.GenerateExecutionPayloadAsync(campaign);
+        return Ok(executionPayload);
     }
 
     [HttpGet("channels")]

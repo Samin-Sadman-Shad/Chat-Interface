@@ -5,7 +5,6 @@ using Chat.Interface.Server.Infrastructure.Services;
 using Chat.Interface.Server.Hubs;
 using FluentValidation;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +33,7 @@ builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 // Services
 builder.Services.AddScoped<IDataSourceConnector, DataSourceConnector>();
 builder.Services.AddScoped<ICampaignGenerator, CampaignGenerator>();
+builder.Services.AddScoped<ICampaignExecutionService, CampaignExecutionService>();
 
 // SignalR
 builder.Services.AddSignalR();

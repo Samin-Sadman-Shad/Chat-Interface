@@ -1,6 +1,5 @@
 using Chat.Interface.Server.Domain.Entities;
 using Polly;
-using Polly.Resilience;
 
 namespace Chat.Interface.Server.Infrastructure.Services;
 
@@ -12,19 +11,23 @@ public interface IDataSourceConnector
 
 public class DataSourceConnector : IDataSourceConnector
 {
-    private readonly IResilienceStrategy _resilienceStrategy;
+    private readonly ResiliencePipeline _resiliencePipeline;
 
     public DataSourceConnector()
     {
-        _resilienceStrategy = new ResilienceStrategyBuilder()
-            .AddRetry(new Polly.Retry.RetryStrategyOptions())
-            .AddTimeout(TimeSpan.FromSeconds(30))
+        _resiliencePipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new Polly.Retry.RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(2)
+            })
+            .AddTimeout(TimeSpan.FromSeconds(10))
             .Build();
     }
 
     public async Task<bool> TestConnectionAsync(DataSource dataSource)
     {
-        return await _resilienceStrategy.ExecuteAsync(async _ =>
+        return await _resiliencePipeline.ExecuteAsync(async _ =>
         {
             // Simulate connection test based on data source type
             return dataSource.Type switch
@@ -39,11 +42,11 @@ public class DataSourceConnector : IDataSourceConnector
 
     public async Task SyncDataAsync(DataSource dataSource)
     {
-        await _resilienceStrategy.ExecuteAsync(async _ =>
+        await _resiliencePipeline.ExecuteAsync(async _ =>
         {
-            // Simulate data synchronization
+            
             await Task.Delay(1000);
-            // Implementation would depend on specific data source
+            
         });
     }
 
