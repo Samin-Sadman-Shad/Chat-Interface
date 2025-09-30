@@ -57,6 +57,7 @@ public class ApplicationDbContext : DbContext
                           v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                           v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new());
             });
+            entity.Ignore(e => e.Metadata);
         });
 
         // Configure ChatSession
